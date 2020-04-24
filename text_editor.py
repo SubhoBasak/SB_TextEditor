@@ -6,7 +6,10 @@ from tkinter import messagebox
 from tkinter import colorchooser
 import tkfontchooser
 
+# Main Class
 class TextEditor:
+
+    # initialize all the component.
     def __init__(self, master):
         self.master = master
         self.font_dict = {'family': 'Arial', 'size': 10, 'weight': 'normal', 'slant': 'roman', 'underline': 0, 'overstrike': 0}
@@ -89,15 +92,25 @@ class TextEditor:
         self.master.bind('<Control-minus>', self.zoom_out)
         self.master.protocol('WM_DELETE_WINDOW', self.close_programe)
 
+    # load all the important data.
     def load(self):
+        # get the home path
         self.home = os.getenv('HOMEPATH')
         self.home = 'C://'+self.home
+
+        # create folder to store the config data
         if not os.path.isdir(os.path.join(self.home, '.SB_Text_Editor')):
             os.mkdir(os.path.join(self.home, '.SB_Text_Editor'))
+
+        # create the setting file to store the setting data.
         if os.path.isfile(os.path.join(self.home, '.SB_Text_Editor/settings.txt')):
             with open(os.path.join(self.home, '.SB_Text_Editor/settings.txt'), 'r') as settings:
+                
+                # in the setting file first line contain the data about the font.
                 tmp = settings.readline().strip().split(';')
                 if len(tmp) == 6:
+
+                    # load the font
                     self.font_dict['family'] = tmp[0]
                     self.font_dict['size'] = int(tmp[1])
                     self.font_dict['weight'] = tmp[2]
@@ -111,17 +124,24 @@ class TextEditor:
                                      underline = self.font_dict['underline'],
                                      overstrike = self.font_dict['overstrike'])
                     self.text.config(font = self.font)
+
+                # second line contain the information about background and foreground color.
                 tmp = settings.readline().strip().split(';')
+
+                # load the colors
                 if len(tmp) == 2:
                     self.bg = tmp[0]
                     self.fg = tmp[1]
                     self.text.config(bg = self.bg, fg = self.fg)
+
+                # third line contain data about cursor color and width.
                 tmp = settings.readline().strip().split(';')
                 if len(tmp) == 2:
                     self.insert = tmp[0]
                     self.insert_width = tmp[1]
                     self.text.config(insertbackground = self.insert, insertwidth = self.insert_width)
 
+    # create new file
     def new_file(self, event = None):
         if len(self.text.get(1.0, tk.END)) > 1:
             inp = messagebox.askyesnocancel('SB Text Editor', 'Do you want to save this file?')
@@ -133,6 +153,7 @@ class TextEditor:
             self.text.delete(1.0, tk.END)
             self.text.edit_reset()
 
+    # open any text file
     def open_file(self, event = None):
         file = filedialog.askopenfile(filetype = [('Text file', '.txt'), ('All file', '*.*')])
         if file != None:
@@ -141,6 +162,7 @@ class TextEditor:
                 self.text.insert(tk.INSERT, line)
             self.file_name = file.name
 
+    # save the file
     def save_file(self, event = None):
         if self.file_name == None:
             self.save_as()
@@ -157,6 +179,7 @@ class TextEditor:
             self.file_name = file.name
             file.close()
 
+    # exit function
     def close_programe(self, event = None):
         if len(self.text.get(1.0, tk.END)) > 1:
             inp = messagebox.askyesnocancel('SB Text Editor', 'Do you want to save this file?')
@@ -166,15 +189,19 @@ class TextEditor:
                 return None
         self.master.quit()
 
+    # copy function
     def copy(self, event = None):
         self.text.event_generate('<<Copy>>')
 
+    # cut function
     def cut(self, event = None):
         self.text.event_generate('<<Cut>>')
 
+    # paste function
     def paste(self, event = None):
         self.text.event_generate('<<Paste>>')
 
+    # delete selected line
     def delete(self, event = None):
         try:
             i1 = self.text.index('sel.first')
@@ -183,6 +210,7 @@ class TextEditor:
         except:
             return None
 
+    # zoom in function
     def zoom_in(self, event = None):
         size = self.font.cget('size')
         size += 1
@@ -192,6 +220,7 @@ class TextEditor:
         self.font.config(size = size)
         self.text.config(font = self.font)
 
+    # zoom out function
     def zoom_out(self, event = None):
         size = self.font.cget('size')
         size -= 1
@@ -201,6 +230,7 @@ class TextEditor:
         self.font.config(size = size)
         self.text.config(font = self.font)
 
+    # change font function
     def change_font(self, event = None):
         font_dict = tkfontchooser.askfont(**self.font_dict)
         if font_dict != '':
@@ -220,6 +250,7 @@ class TextEditor:
                 tmp += '\n' + self.insert + ';' + str(self.insert_width)
                 settings.write(tmp)
 
+    # change background color
     def change_bg(self, event = None):
         color = colorchooser.askcolor()
         if color[1] != None:
@@ -231,6 +262,7 @@ class TextEditor:
                 tmp += '\n' + self.insert + ';' + str(self.insert_width)
                 settings.write(tmp)
 
+    # change foreground color
     def change_fg(self, event = None):
         color = colorchooser.askcolor()
         if color[1] != None:
@@ -242,6 +274,7 @@ class TextEditor:
                 tmp += '\n' + self.insert + ';' + str(self.insert_width)
                 settings.write(tmp)
 
+    # change cursor color
     def change_cursor_color(self):
         color = colorchooser.askcolor()
         if color[1] != None:
